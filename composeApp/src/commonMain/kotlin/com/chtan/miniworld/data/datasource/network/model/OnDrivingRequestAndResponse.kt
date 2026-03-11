@@ -1,0 +1,22 @@
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+data class DriveControlDto(
+    val cid: String = "",  // carId
+    val s: Int = 0,     // steering
+    val t: Int = 0,     // throttle
+    val g: Int = 0,       // gear
+    val b: Boolean = true,     // brake
+    val c: Boolean = true,     // brake
+    val m: String = "P",
+    val cx: Float = 0f,    // cameraView.x
+    val cy: Float = 0f    // cameraView.y
+)
+
+@Serializable
+data class ToggleFeatureDto(
+    val cid: String,
+    val f: String,   // "MIC", "SOUND", "HEADLIGHT"
+    val e: Boolean
+)
