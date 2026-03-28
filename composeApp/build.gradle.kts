@@ -82,6 +82,8 @@ kotlin {
             implementation(libs.filekit.dialogs.compose)
             implementation(libs.filekit.coil)
 
+            implementation(libs.kevinnzou.webview)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

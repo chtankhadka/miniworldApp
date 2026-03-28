@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.chtan.miniworld.presentation.user.drive.DriveScreen
 import com.chtan.miniworld.presentation.user.drive.DriveViewModel
-import com.chtan.miniworld.presentation.user.login.SignInScreen
-import com.chtan.miniworld.presentation.user.login.SignInViewModel
+import com.chtan.miniworld.presentation.login.SignInScreen
+import com.chtan.miniworld.presentation.login.SignInViewModel
 import kotlinx.coroutines.CoroutineScope
 
 import org.koin.compose.viewmodel.koinViewModel

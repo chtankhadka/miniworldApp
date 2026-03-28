@@ -1,4 +1,4 @@
-package com.chtan.miniworld.presentation.user.login
+package com.chtan.miniworld.presentation.login
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

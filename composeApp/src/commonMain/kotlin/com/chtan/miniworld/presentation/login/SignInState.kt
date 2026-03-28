@@ -1,4 +1,4 @@
-package com.chtan.miniworld.presentation.user.login
+package com.chtan.miniworld.presentation.login
 
 data class SignInState(
     val value: String = "",

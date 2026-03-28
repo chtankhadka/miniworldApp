@@ -11,9 +11,9 @@ object ApiEndPoints {
 //    const val driveSocketUrl = "ws://13.48.43.197:8080/api/ws/user?deviceId=6970f457323597dd06e16308"
 
     //local
-    const val BASE_URL = "http://192.168.0.250:8080"
-    const val imageSocketUrl = "ws://192.168.0.250:8080/api/ws/usercam?deviceId=693421d75a4cfba1adfaaa0e"
-    const val driveSocketUrl = "ws://192.168.0.250:8080/api/ws/user?deviceId=696b642f09e25fc963cea228"
+    const val BASE_URL = "http://192.168.0.12:8080"
+    const val imageSocketUrl = "ws://192.168.0.12:8080/api/ws/usercam?deviceId=693421d75a4cfba1adfaaa0e"
+    const val driveSocketUrl = "ws://192.168.0.12:8080/api/ws/user?deviceId=696b642f09e25fc963cea228"
 
 
     const val SIGN_IN = "$BASE_URL/usignin"

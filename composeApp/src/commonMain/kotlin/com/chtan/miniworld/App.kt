@@ -16,7 +16,7 @@ fun App() {
         val scope = rememberCoroutineScope()
         val mainViewModel = koinViewModel<MainViewModel>()
         val navController = rememberNavController()
-        var route by remember { mutableStateOf<Route?>(Route.SignIn) }
+        var route by remember { mutableStateOf<Route?>(Route.Derive) }
         var check = koinInject<UserRepository>()
         MaterialTheme {
 //            mainViewModel.getMyProfile { bool ->

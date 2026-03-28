@@ -10,8 +10,9 @@ data class DriveControlDto(
     val b: Boolean = true,     // brake
     val c: Boolean = true,     // brake
     val m: String = "P",
-    val cx: Float = 0f,    // cameraView.x
-    val cy: Float = 0f    // cameraView.y
+    val isXY: Boolean = false,
+    val cx: Int = 90,    // cameraView.x
+    val cy: Int = 90,    // cameraView.y
 )
 
 @Serializable
