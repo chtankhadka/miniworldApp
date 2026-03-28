@@ -28,7 +28,7 @@ class DriveViewModel(
 
     init {
         connectToCar()
-        connectToCam(true)
+//        connectToCam(true)
 
     }
 
@@ -114,6 +114,18 @@ class DriveViewModel(
                 is DriveEvent.ConnectToCam -> {
                     connectToCam(event.value)
 
+                }
+
+                is DriveEvent.OnXYChange -> {
+                    val newValue = state.value.driveControlDto.copy(isXY = true, cx = event.x, cy = event.y)
+                    if (newValue == state.value.driveControlDto) return@launch
+
+                    repository.sendMessage(newValue)
+                    _state.update {
+                        it.copy(driveControlDto = newValue.copy(isXY = event.isXYChange))
+
+                    }
+                    println("change value"+ state.value.driveControlDto)
                 }
             }
         }

@@ -11,4 +11,6 @@ sealed interface DriveEvent {
     data class OnChangeBreak(val value: Boolean): DriveEvent
     data class OnChangeMode(val value: String): DriveEvent
 
+    data class OnXYChange(val x: Int, val y: Int, val isXYChange: Boolean): DriveEvent
+
 }

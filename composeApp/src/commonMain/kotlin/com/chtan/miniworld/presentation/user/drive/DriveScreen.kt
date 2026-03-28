@@ -1,50 +1,37 @@
 package com.chtan.miniworld.presentation.user.drive
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.CarRental
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,36 +39,40 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.chtan.miniworld.presentation.user.drive.Components.DrivingMode
+import com.chtan.miniworld.presentation.user.components.Break
+import com.chtan.miniworld.presentation.user.components.GearChange
+import com.chtan.miniworld.presentation.user.components.GearSelectorRow
+import com.chtan.miniworld.presentation.user.components.HorizontalAutoCenterSlider
+import com.chtan.miniworld.presentation.user.components.VerticalAcceleratorPedal
 import com.chtan.miniworld.presentation.user.drive.selectdevices.NavDevicesScreen
-import com.chtan.miniworld.utils.byteArrayToBitmap
+import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.rememberWebViewState
+import kotlinx.coroutines.launch
 import miniworld.composeapp.generated.resources.Res
-import miniworld.composeapp.generated.resources.brake
 import miniworld.composeapp.generated.resources.car2
 import miniworld.composeapp.generated.resources.carConnected
-import miniworld.composeapp.generated.resources.clutch
-import miniworld.composeapp.generated.resources.steering
 import org.jetbrains.compose.resources.painterResource
-import kotlin.math.roundToInt
+import kotlin.math.abs
 
+enum class SwipeDirection {
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
+    NONE
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriveScreen(
@@ -91,16 +82,22 @@ fun DriveScreen(
     viewModel: DriveViewModel
 ) {
 
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    var drawerState = rememberDrawerState(DrawerValue.Closed)
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
-
     val coroutineScope = rememberCoroutineScope()
-    var turningValue by remember { mutableStateOf(0) }
-    var accelerateValue by remember { mutableStateOf(0) }
+    val webViewState = rememberWebViewState(
+        url = "http://192.168.0.12:8080/stream/693421d75a4cfba1adfaaa0e",
+        extraSettings = {
+            isJavaScriptEnabled = true
+            supportZoom = true
+        }
+    )
+
 
 
     val imageBytes by viewModel.latestFrameBytes.collectAsStateWithLifecycle(null)
     ModalNavigationDrawer(
+
         drawerState = drawerState, drawerContent = {
             // Right drawer content (slides from right)
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -110,106 +107,166 @@ fun DriveScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    NavDevicesScreen()
+                    NavDevicesScreen(drawerState,coroutineScope)
                 }
             }
-        }, gesturesEnabled = true, modifier = Modifier.fillMaxSize()
+        }, gesturesEnabled = false, modifier = Modifier.fillMaxSize()
     ) {
+
         // Scaffold content (main screen)
         Scaffold(
+            modifier = Modifier.background(Color.Transparent) ,
             topBar = {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()) // Scroll the whole Box horizontally
-                        .padding(8.dp)
-                ) {
-                    Row(
-
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Spacer(modifier = Modifier.width(5 * (60.dp + 8.dp))) // same as 5 buttons with spacing
-
-
-                        Box(modifier = Modifier.size(60.dp).clickable {
-                            event(DriveEvent.ConnectToCar)
-                        }) {
-                            Image(
-                                modifier = Modifier.fillMaxSize().clickable{
-                                    if (!state.isConnected){
-                                        event(DriveEvent.ConnectToCar)
-                                    }
-                                },
-                                painter = painterResource(Res.drawable.carConnected),
-                                contentDescription = null
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                            }
+                        },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.CarRental,
+                                contentDescription = "Change Car"
                             )
-                            if (!state.isConnected) {
-                                Canvas(
-                                    modifier = Modifier.fillMaxSize(), onDraw = {
-                                        drawLine(
-                                            color = Color.Black,
-                                            strokeWidth = 10f,
-                                            start = Offset(0f, 0f),
-                                            end = Offset(size.width, size.height)
-                                        )
-                                    })
+                        }
+                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()) // Scroll the whole Box horizontally
+                            .padding(8.dp)
+                    )
+                    {
+                        Row(
+
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Spacer(modifier = Modifier.width(5 * (60.dp + 8.dp))) // same as 5 buttons with spacing
+
+
+                            Box(modifier = Modifier.size(60.dp).clickable {
+                                event(DriveEvent.ConnectToCar)
+                            }) {
+                                Image(
+                                    modifier = Modifier.fillMaxSize().clickable {
+                                        if (!state.isConnected) {
+                                            event(DriveEvent.ConnectToCar)
+                                        }
+                                    },
+                                    painter = painterResource(Res.drawable.carConnected),
+                                    contentDescription = null
+                                )
+                                if (!state.isConnected) {
+                                    Canvas(
+                                        modifier = Modifier.fillMaxSize(), onDraw = {
+                                            drawLine(
+                                                color = Color.Black,
+                                                strokeWidth = 10f,
+                                                start = Offset(0f, 0f),
+                                                end = Offset(size.width, size.height)
+                                            )
+                                        })
+                                }
+
+                            }
+                            Box(modifier = Modifier.size(60.dp).clickable {
+                                event(DriveEvent.ConnectToCar)
+                            }) {
+                                Image(
+                                    modifier = Modifier.fillMaxSize().clickable {
+                                        event(DriveEvent.ConnectToCam(state.isCamConnected))
+                                    },
+                                    painter = painterResource(Res.drawable.car2),
+                                    contentDescription = null
+                                )
+                                if (!state.isCamConnected) {
+                                    Canvas(
+                                        modifier = Modifier.fillMaxSize(), onDraw = {
+                                            drawLine(
+                                                color = Color.Black,
+                                                strokeWidth = 10f,
+                                                start = Offset(0f, 0f),
+                                                end = Offset(size.width, size.height)
+                                            )
+                                        })
+                                }
+
                             }
 
-                        }
-                        Box(modifier = Modifier.size(60.dp).clickable {
-                            event(DriveEvent.ConnectToCar)
-                        }) {
-                            Image(
-                                modifier = Modifier.fillMaxSize().clickable{
-                                    event(DriveEvent.ConnectToCam(state.isCamConnected))
-                                },
-                                painter = painterResource(Res.drawable.car2),
-                                contentDescription = null
-                            )
-                            if (!state.isCamConnected) {
-                                Canvas(
-                                    modifier = Modifier.fillMaxSize(), onDraw = {
-                                        drawLine(
-                                            color = Color.Black,
-                                            strokeWidth = 10f,
-                                            start = Offset(0f, 0f),
-                                            end = Offset(size.width, size.height)
-                                        )
-                                    })
-                            }
-
-                        }
-
-                        repeat(20) { index ->
-                            Button(
-                                onClick = {}, shape = CircleShape, modifier = Modifier.size(60.dp)
-                            ) {
-                                Text("car")
+                            repeat(20) { index ->
+                                Button(
+                                    onClick = {},
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(60.dp)
+                                ) {
+                                    Text("car")
+                                }
                             }
                         }
                     }
                 }
 
             }) { innerPadding ->
-            // Main content
+            WebView(
+                state = webViewState,
+                modifier = Modifier.fillMaxSize()
+            )
+            // Main conten
+            var x: Float by  remember { mutableStateOf(0f)}
+            var y: Float by remember { mutableStateOf(0f)}
             Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).background(Color.Transparent)
+                    .pointerInput(Unit) {
+                        detectDragGestures (
+                            onDragEnd = {
+                                event(DriveEvent.OnXYChange(
+                                    isXYChange = false,
+                                    x = 4915,
+                                    y = 4915))
+                            }
+
+                        ){ change, dragAmount ->
+
+                            x = dragAmount.x
+                            y = dragAmount.y
+                            change.consume()
+
+                            val isHorizontal = abs(dragAmount.x) > abs(dragAmount.y)
+                            val direction = when {
+                                isHorizontal && dragAmount.x > 0  -> SwipeDirection.RIGHT
+                                isHorizontal && dragAmount.x < 0  -> SwipeDirection.LEFT
+                                !isHorizontal && dragAmount.y < 0 -> SwipeDirection.UP
+                                !isHorizontal && dragAmount.y > 0 -> SwipeDirection.DOWN
+                                else                               -> SwipeDirection.NONE
+                            }
+
+                            val xValue = when (direction) {
+                                SwipeDirection.LEFT  -> 5788
+                                SwipeDirection.RIGHT -> 3713
+                                else                 -> 4915  // neutral when moving vertically
+                            }
+
+                            val yValue = when (direction) {
+                                SwipeDirection.UP   -> 3713
+                                SwipeDirection.DOWN -> 5788
+                                else                -> 4915  // neutral when moving horizontally
+                            }
+
+                            event(DriveEvent.OnXYChange(
+                                isXYChange = true,
+                                x = xValue,
+                                y = yValue
+                            ))
+
+                        }
+                    }
                     .onGloballyPositioned { layoutCoordinates ->
                         boxSize = layoutCoordinates.size  // width & height (px)
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = state.driveControlDto.toString())
+                Text(text = "")
 
-                imageBytes?.let { bytes ->
-                    Text(text = bytes.size.toString())
-                    Text(text = "aajhai aayena kya ho")
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        bitmap = byteArrayToBitmap(bytes),
-                        contentDescription = null
-                    )
-
-                }
                 Box(modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)) {
                     Column {
                         GearSelectorRow(
@@ -260,367 +317,3 @@ fun DriveScreen(
     }
 }
 
-
-@Composable
-fun Break(
-    modifier: Modifier = Modifier, onClickBreak: () -> Unit
-) {
-    var isBreakApplied by remember { mutableStateOf(false) }
-    val density = LocalDensity.current.density
-
-    Image(
-        modifier = Modifier.size(48.dp).pointerInput(Unit) {
-            awaitPointerEventScope {
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes[0]
-                    if (change.pressed) {
-                        isBreakApplied = true
-                        change.consume()
-                    } else {
-                        isBreakApplied = false
-                        change.consume()
-                    }
-                }
-            }
-        }.graphicsLayer {
-            if (isBreakApplied) {
-                rotationX = -35f
-                cameraDistance = 18 * density
-                onClickBreak()
-
-            }
-
-
-        }, painter = painterResource(Res.drawable.brake), contentDescription = null
-    )
-}
-
-
-@Composable
-fun GearSelectorRow(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    trackWidth: Dp,
-    highlightColor: Color = Color(0xFF00BFA6),
-    inactiveText: Color = Color.Gray,
-    activeText: Color = Color.White
-) {
-    val modes = listOf(DrivingMode.PARK, DrivingMode.BACK, DrivingMode.DRIVE)
-    val currentMode = modes.find { it.short == value } ?: modes.first()
-    val density = LocalDensity.current
-
-    BoxWithConstraints(
-        modifier = modifier.width(trackWidth)
-    ) {
-        // Auto-calc highlight width based on full width
-        val highlightWidth = maxWidth / modes.size
-
-        // Pre-calc px
-        val highlightPx = with(density) { highlightWidth.toPx() }
-        val trackPx = with(density) { maxWidth.toPx() }
-
-        // Step between positions
-        val stepPx = (trackPx - highlightPx) / (modes.size - 1)
-
-        val offsetX = remember { Animatable(0f) }
-
-        // Animate sliding background
-        LaunchedEffect(value) {
-            val index = modes.indexOf(currentMode)
-            offsetX.animateTo(
-                targetValue = index * stepPx,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessMediumLow
-                )
-            )
-        }
-
-        // 🟩 Sliding Highlight Behind Text
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(offsetX.value.toInt(), 0) }
-                .width(highlightWidth)
-                .height(highlightWidth)
-                .clip(RoundedCornerShape(16.dp))
-                .background(highlightColor)
-        )
-
-        // 🔤 Only One Row of Letters
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .height(IntrinsicSize.Min),  // Auto height
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            modes.forEach { mode ->
-                val isActive = mode == currentMode
-
-                Text(
-                    text = mode.short,
-                    color = if (isActive) activeText else inactiveText,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .clickable { onValueChange(mode.short) }
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-fun VerticalAcceleratorPedal(
-    modifier: Modifier = Modifier,
-    trackHeight: Dp = 150.dp,
-    iconSize: Dp = 80.dp,
-    minValue: Int = 0,
-    maxValue: Int = 9,
-    lineColor: Color = Color.DarkGray,
-    iconColor: Color = Color.Blue,
-    density: Float = 1f,
-    onValueChange: (Int) -> Unit = {}
-) {
-    var dragOffset by remember { mutableStateOf(0f) } // px from center
-    var isDragging by remember { mutableStateOf(false) }
-
-    val trackHeightPx = trackHeight.value * density
-    val iconSizePx = iconSize.value * density
-    val halfTrackPx = trackHeightPx / 2f
-    val maxOffset = halfTrackPx - (iconSizePx / 2) // Ensure center stays within track
-
-    // Initial position at bottom (max offset = higher value)
-    val initialOffset = maxOffset
-    LaunchedEffect(Unit) {
-        dragOffset = initialOffset
-        onValueChange(minValue)
-    }
-
-    val animatedOffset by animateFloatAsState(
-        targetValue = if (isDragging) dragOffset else initialOffset,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
-        label = "pedalSpringBack"
-    )
-
-    // Current speed value derived from the displayed (animated) offset
-    val currentSpeed = remember {
-        derivedStateOf {
-            val offset = animatedOffset.coerceIn(-maxOffset, maxOffset)
-            val positionRatio = 1f - ((offset / maxOffset + 1f) / 2f) // bottom -> 1, top -> 0
-            val valueRange = maxValue - minValue
-            (minValue + (positionRatio * valueRange)).roundToInt().coerceIn(minValue, maxValue)
-        }
-    }
-
-    // Call onValueChange whenever the displayed speed changes
-    LaunchedEffect(currentSpeed.value) {
-        onValueChange(currentSpeed.value)
-    }
-
-    val coroutineScope = rememberCoroutineScope()
-
-    Box(
-        modifier = modifier
-            .width(iconSize + 20.dp)
-            .height(trackHeight)
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        isDragging = true
-                        val centerY = size.height / 2f
-                        var currentOffset = (down.position.y - centerY).coerceIn(-maxOffset, maxOffset)
-                        dragOffset = currentOffset
-                        down.consume()
-
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes[0]
-                            if (change.pressed) {
-                                val currentY = change.position.y
-                                currentOffset = (currentY - centerY).coerceIn(-maxOffset, maxOffset)
-                                dragOffset = currentOffset
-                                change.consume()
-                            } else {
-                                // Release
-                                isDragging = false
-                                change.consume()
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-    ) {
-        // Vertical line track (uncomment if you want it visible)
-//        Canvas(modifier = Modifier.fillMaxSize()) {
-//            val centerX = size.width / 2
-//            drawLine(
-//                color = lineColor,
-//                start = Offset(centerX, 0f),
-//                end = Offset(centerX, size.height),
-//                strokeWidth = 4f * density
-//            )
-//        }
-
-        val displayOffsetPx = animatedOffset.coerceIn(-maxOffset, maxOffset)
-        val offsetDpY = (displayOffsetPx / density).dp
-
-        Image(
-            modifier = Modifier
-                .size(iconSize)
-                .align(Alignment.Center)
-                .offset(y = offsetDpY)
-                .graphicsLayer {
-                    rotationX = (-(currentSpeed.value - 3) * 7f)
-                    cameraDistance = 18 * density
-                },
-            painter = painterResource(Res.drawable.clutch),
-            contentDescription = null
-        )
-    }
-}
-
-
-@Composable
-fun HorizontalAutoCenterSlider(
-    modifier: Modifier = Modifier,
-    trackWidth: Dp = 200.dp,
-    iconSize: Dp = 80.dp,
-    minValue: Int = -5,
-    maxValue: Int = 5,
-    centerValue: Int = 0,
-    lineColor: Color = Color.DarkGray,
-    density: Float = 1f,
-    onValueChange: (Int) -> Unit = {}
-) {
-    var dragOffset by remember { mutableStateOf(0f) }
-    var isDragging by remember { mutableStateOf(false) }
-
-    val trackWidthPx = trackWidth.value * density
-    val iconSizePx = iconSize.value * density
-    val halfTrackPx = trackWidthPx / 2f
-    val maxOffset = halfTrackPx - (iconSizePx / 2f)
-
-    // Animate back to center (0f) when not dragging
-    val animatedOffset by animateFloatAsState(
-        targetValue = if (isDragging) dragOffset else 0f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
-        label = "autoCenterSpring"
-    )
-
-    // Current value derived from the *visible* (animated) position
-    val currentValue = remember {
-        derivedStateOf {
-            val offset = animatedOffset.coerceIn(-maxOffset, maxOffset)
-            val positionRatio = (offset / maxOffset + 1f) / 2f
-            val valueRange = maxValue - minValue
-            (minValue + (positionRatio * valueRange)).roundToInt().coerceIn(minValue, maxValue)
-        }
-    }
-
-    // Call onValueChange whenever the displayed value changes (during drag AND return)
-    LaunchedEffect(currentValue.value) {
-        onValueChange(currentValue.value)
-    }
-
-    // Initial center position
-    LaunchedEffect(Unit) {
-        onValueChange(centerValue)
-    }
-
-    Box(
-        modifier = modifier
-            .width(trackWidth)
-            .height(iconSize + 20.dp)
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        isDragging = true
-                        val centerX = size.width / 2f
-                        var currentOffset = (down.position.x - centerX).coerceIn(-maxOffset, maxOffset)
-                        dragOffset = currentOffset
-                        down.consume()
-
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.first()
-                            if (change.pressed) {
-                                val currentX = change.position.x
-                                currentOffset = (currentX - centerX).coerceIn(-maxOffset, maxOffset)
-                                dragOffset = currentOffset
-                                change.consume()
-                            } else {
-                                // Finger released
-                                isDragging = false
-                                change.consume()
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-    ) {
-        // Optional track line
-//        Canvas(modifier = Modifier.fillMaxSize()) {
-//            val centerY = size.height / 2f
-//            drawLine(
-//                color = lineColor,
-//                start = Offset(0f, centerY),
-//                end = Offset(size.width, centerY),
-//                strokeWidth = 4f * density
-//            )
-//        }
-
-        val displayOffsetPx = animatedOffset.coerceIn(-maxOffset, maxOffset)
-        val offsetDpX = (displayOffsetPx / density).dp
-
-        Image(
-            modifier = Modifier
-                .size(iconSize)
-                .align(Alignment.Center)
-                .offset(x = offsetDpX)
-                .rotate(offsetDpX.value), // Keeps your rotation effect
-            painter = painterResource(Res.drawable.steering),
-            contentDescription = "Steering Wheel"
-        )
-    }
-}
-
-
-@Composable
-fun GearChange(
-    onClickGear: (Int) -> Unit, modifier: Modifier = Modifier, gear: Int
-) {
-    var gear by remember { mutableStateOf(gear) }
-    Box(modifier = modifier.padding(5.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            IconButton(onClick = {
-                if (gear < 4) {
-                    gear++
-                    onClickGear(gear)
-                }
-            }, content = {
-                Icon(imageVector = Icons.Default.ArrowUpward, contentDescription = null)
-            })
-            Text(text = "G$gear")
-            IconButton(onClick = {
-                if (gear > 0) {
-                    gear--
-                    onClickGear(gear)
-                }
-            }, content = {
-                Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = null)
-            })
-        }
-
-    }
-}
