@@ -10,6 +10,11 @@ import com.chtan.miniworld.presentation.user.drive.DriveScreen
 import com.chtan.miniworld.presentation.user.drive.DriveViewModel
 import com.chtan.miniworld.presentation.login.SignInScreen
 import com.chtan.miniworld.presentation.login.SignInViewModel
+import com.chtan.miniworld.presentation.user.dashboard.UserDashboardScreen
+import com.chtan.miniworld.presentation.user.dashboard.UserDashboardViewModel
+import com.chtan.miniworld.presentation.user.home.HomeScreen
+import com.chtan.miniworld.presentation.user.selectVehicle.UserSelectVehicleScreen
+import com.chtan.miniworld.presentation.user.selectVehicle.UserSelectVehicleViewModel
 import kotlinx.coroutines.CoroutineScope
 
 import org.koin.compose.viewmodel.koinViewModel
@@ -74,14 +79,27 @@ fun Navigation(
 //                events = viewModel.onEvents
 //            )
 //        }
-//        composable<Route.Message> {
-//            val viewModel = koinViewModel<MessageViewModel>()
-//            MessageScreen(
-//                nav = navController,
-//                states = viewModel.state.collectAsState().value,
-//                events = viewModel.onEvents
-//            )
-//        }
+        composable<Route.UserDashboard> {
+//            UserMapScreen()
+            val viewModel: UserDashboardViewModel = koinViewModel()
+
+            UserDashboardScreen(
+                nav = navController,
+                event = viewModel.onEvent,
+                state = viewModel.state.collectAsStateWithLifecycle().value)
+        }
+
+        composable<Route.UserSelectVehicle> {
+            val viewModel: UserSelectVehicleViewModel = koinViewModel()
+
+            UserSelectVehicleScreen(
+                nav = navController,
+                event = viewModel.onEvent,
+                state = viewModel.state.collectAsStateWithLifecycle().value)
+        }
+        composable<Route.UserHome> {
+            HomeScreen()
+        }
 
     }
 }

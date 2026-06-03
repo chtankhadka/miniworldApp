@@ -1,6 +1,5 @@
 package com.chtan.miniworld
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 sealed interface Route {
@@ -11,14 +10,21 @@ sealed interface Route {
     data object SignIn: Route
 
     @Serializable
+    data object UserHome: Route
+
+    @Serializable
     data object Chat: Route
 
     @Serializable
     data object Map: Route
 
     @Serializable
-    data object Dashboard: Route
+    data object UserDashboard: Route
 
+    @Serializable
+    data object UserSelectVehicle: Route{
+
+    }
     @Serializable
     data object Derive: Route
 
@@ -26,3 +32,6 @@ sealed interface Route {
     @Serializable
     data class Message(val id: String): Route
 }
+
+
+

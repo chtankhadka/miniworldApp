@@ -22,7 +22,7 @@ val koin = initKoinJVM()
 fun main() = application {
     val windowState = rememberWindowState(
         placement = WindowPlacement.Floating, // start in fullscreen
-        size = DpSize(500.dp, 300.dp)           // fallback size
+        size = DpSize(750.dp, 400.dp)           // fallback size
     )
 
 

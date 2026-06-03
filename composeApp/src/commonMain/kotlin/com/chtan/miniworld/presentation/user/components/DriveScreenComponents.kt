@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,7 +41,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -420,3 +424,39 @@ fun GearChange(
 
     }
 }
+
+@Composable
+fun RacingItemBackground(
+    modifier: Modifier = Modifier,
+    active: Boolean
+) {
+    Canvas(modifier = modifier) {
+        if (!active) return@Canvas
+
+        val slant = size.height * 0.45f
+
+        val main = Path().apply {
+            moveTo(slant, 0f)
+            lineTo(size.width, 0f)
+            lineTo(size.width - slant, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+
+        drawPath(main, Color(0xFFE10600))
+
+        // black racing stripe
+        drawRect(
+            color = Color.Black.copy(alpha = 0.35f),
+            topLeft = Offset(size.width * 0.72f, 0f),
+            size = Size(size.width * 0.08f, size.height)
+        )
+
+        drawRect(
+            color = Color.White.copy(alpha = 0.9f),
+            topLeft = Offset(size.width * 0.82f, 0f),
+            size = Size(size.width * 0.04f, size.height)
+        )
+    }
+}
+

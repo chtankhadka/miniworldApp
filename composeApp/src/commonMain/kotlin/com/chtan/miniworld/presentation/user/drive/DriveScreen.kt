@@ -57,6 +57,7 @@ import com.chtan.miniworld.presentation.user.components.GearSelectorRow
 import com.chtan.miniworld.presentation.user.components.HorizontalAutoCenterSlider
 import com.chtan.miniworld.presentation.user.components.VerticalAcceleratorPedal
 import com.chtan.miniworld.presentation.user.drive.selectdevices.NavDevicesScreen
+import com.chtan.miniworld.presentation.user.drive.selectdevices.UserDriveButton
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewState
 import kotlinx.coroutines.launch
@@ -107,7 +108,20 @@ fun DriveScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    NavDevicesScreen(drawerState,coroutineScope)
+                    NavDevicesScreen(onClick = {
+                        when(it){
+                            UserDriveButton.BackToMenu -> {
+
+                            }
+                            UserDriveButton.Close -> {
+                                coroutineScope.launch {
+                                    if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                                }
+
+                            }
+                        }
+
+                    })
                 }
             }
         }, gesturesEnabled = false, modifier = Modifier.fillMaxSize()
