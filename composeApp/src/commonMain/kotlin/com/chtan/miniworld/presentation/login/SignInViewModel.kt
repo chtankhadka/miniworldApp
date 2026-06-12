@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.chtan.personalwork.core.domain.Result
+import com.chtan.miniworld.data.datasource.network.result.RemoteResult
 import com.chtan.miniworld.data.datasource.network.model.authorization.SignInRequestModel
 
 class SignInViewModel(
@@ -38,20 +38,22 @@ class SignInViewModel(
                         )
                     )
                     when (signInRequest) {
-                        is Result.Error -> {
+                        is RemoteResult.Error -> {
                             println("I am error ...............................")
                         }
 
-                        is Result.Success -> {
-                            preferences.edit { dataStore ->
-                                dataStore[stringPreferencesKey("access_token")] = signInRequest.data.data.accessToken
-                                dataStore[stringPreferencesKey("id")] = signInRequest.data.data.userId
-                                dataStore[stringPreferencesKey("refresh_token")] = signInRequest.data.data.refreshToken
-                            }
-                            _state.update {
-                                it.copy(
-                                    isLoggedIn = true
-                                )
+                        is RemoteResult.Success -> {
+                            signInRequest.data.data?.let { data ->
+                                preferences.edit { dataStore ->
+                                    dataStore[stringPreferencesKey("access_token")] = data.accessToken
+                                    dataStore[stringPreferencesKey("id")] = data.userId
+                                    dataStore[stringPreferencesKey("refresh_token")] = data.refreshToken
+                                }
+                                _state.update {
+                                    it.copy(
+                                        isLoggedIn = true
+                                    )
+                                }
                             }
                         }
                     }

@@ -1,15 +1,18 @@
 package com.chtan.miniworld.data.datasource.network.result
 
-import com.chtan.miniworld.data.datasource.network.result.Error
-
 sealed interface DataError: Error {
-    enum class Remote: DataError {
-        REQUEST_TIMEOUT,
-        TOO_MANY_REQUESTS,
-        NO_INTERNET,
-        SERVER,
-        SERIALIZATION,
-        UNKNOWN
+    sealed interface Remote: DataError {
+        data object REQUEST_TIMEOUT : Remote
+        data object TOO_MANY_REQUESTS : Remote
+        data object NO_INTERNET : Remote
+        data object SERVER : Remote
+        data object SERIALIZATION : Remote
+
+        data object UNAUTHORIZED: Remote
+        data object FORBIDDEN: Remote
+        data object NOT_FOUND: Remote
+        data object UNKNOWN : Remote
+        data class BackendError(val message: String) : Remote
     }
 
     enum class Local: DataError {

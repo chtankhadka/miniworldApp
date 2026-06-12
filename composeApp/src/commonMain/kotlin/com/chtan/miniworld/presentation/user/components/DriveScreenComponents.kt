@@ -52,7 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.chtan.miniworld.presentation.user.drive.Components.DrivingMode
+import com.chtan.miniworld.presentation.user.dashboard.drive.Components.DrivingMode
 import miniworld.composeapp.generated.resources.Res
 import miniworld.composeapp.generated.resources.brake
 import miniworld.composeapp.generated.resources.clutch

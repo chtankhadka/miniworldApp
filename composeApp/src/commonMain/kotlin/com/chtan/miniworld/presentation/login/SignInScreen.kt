@@ -37,12 +37,14 @@ fun SignInScreen(
     states: SignInState,
     nav: NavHostController
 ){
+
+
     Scaffold(
         content = {
 
             LaunchedEffect(states.isLoggedIn){
                 if (states.isLoggedIn){
-                    nav.navigate(Route.Derive)
+                    nav.navigate(Route.UserDashboard)
                 }
 
             }

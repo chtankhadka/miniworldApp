@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MiniWorldBottomAppBar(){
+fun UserDashboardBottomAppBar(){
 
     Text("bottom app bar")
 }

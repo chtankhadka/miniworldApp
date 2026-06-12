@@ -1,3 +1,5 @@
+package com.chtan.miniworld.data.datasource.network.model
+
 import kotlinx.serialization.Serializable
 
 

@@ -29,7 +29,7 @@ import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MiniWorldTopAppBar() {
+fun UserDashboardTopAppBar() {
     TopAppBar(
         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
             .background(color = MaterialTheme.colorScheme.outline),

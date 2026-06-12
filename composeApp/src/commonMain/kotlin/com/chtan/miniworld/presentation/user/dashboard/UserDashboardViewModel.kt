@@ -2,7 +2,6 @@ package com.chtan.miniworld.presentation.user.dashboard
 
 import androidx.lifecycle.ViewModel
 import com.chtan.miniworld.domain.repository.UserRepository
-import com.chtan.miniworld.presentation.user.drive.DriveEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
