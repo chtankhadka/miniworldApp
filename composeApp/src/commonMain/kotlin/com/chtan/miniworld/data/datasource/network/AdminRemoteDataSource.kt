@@ -1,0 +1,131 @@
+package com.chtan.miniworld.data.datasource.network
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.chtan.miniworld.data.datasource.local.StoredData
+import com.chtan.miniworld.data.datasource.network.api.ApiEndPoints.ADMIN_ADD_DEVICE_TO_CLAN
+import com.chtan.miniworld.data.datasource.network.api.ApiEndPoints.ADMIN_CREATE_CLAN
+import com.chtan.miniworld.data.datasource.network.api.ApiEndPoints.GET_CREATED_CLANS
+import com.chtan.miniworld.data.datasource.network.model.CommonResponse
+import com.chtan.miniworld.data.datasource.network.model.admin.clan.CreateClanRequest
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
+import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readReason
+import io.ktor.websocket.readText
+import com.chtan.miniworld.data.datasource.network.httpclient.responseToResult
+import com.chtan.miniworld.data.datasource.network.httpclient.safeCall
+import com.chtan.miniworld.data.datasource.network.model.admin.clan.AddDeviceToClanRequest
+import com.chtan.miniworld.data.datasource.network.model.admin.clan.GetCreatedClansResponseModel
+import com.chtan.miniworld.data.datasource.network.result.RemoteResult
+
+class AdminRemoteDataSource(
+    private val httpClient: HttpClient,
+    preferences: DataStore<Preferences>
+) {
+
+    private var session: DefaultClientWebSocketSession? = null
+    private val userData = StoredData(preferences)
+
+
+    suspend fun createClan(data: CreateClanRequest): RemoteResult<CommonResponse> {
+        return authorizeRequest(ADMIN_CREATE_CLAN, data)
+    }
+
+    suspend fun addDeviceInClan(data: AddDeviceToClanRequest): RemoteResult<CommonResponse> {
+        return authorizeRequest(ADMIN_ADD_DEVICE_TO_CLAN, data)
+    }
+
+    suspend fun getCreatedClans(): RemoteResult<GetCreatedClansResponseModel> {
+        return authorizeRequest(GET_CREATED_CLANS)
+    }
+
+
+
+
+
+
+
+
+
+
+
+    private suspend inline fun <reified T> authorizeRequest(
+        endpoint: String,
+        body: Any? = null
+    ): RemoteResult<T> {
+        val token = userData.getToken()
+
+        return safeCall(execute = {
+            httpClient.post(urlString = endpoint) {
+                contentType(ContentType.Application.Json)
+                body?.let { setBody(it) }
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+        }, responseMapper = { response ->
+            responseToResult(response)
+        })
+    }
+
+    private suspend inline fun <reified T> publicRequest(
+        endpoint: String,
+        body: Any? = null
+    ): RemoteResult<T> {
+        return safeCall(execute = {
+            httpClient.post(urlString = endpoint) {
+                contentType(ContentType.Application.Json)
+                body?.let { setBody(it) }
+            }
+
+        }, responseMapper = { response ->
+            responseToResult(response)
+        })
+    }
+    suspend fun startSocketConnection(
+        onTextReceived: (value: String) -> Unit,
+        onClose: (value: String) -> Unit,
+    ) {
+        val token = userData.getToken()
+        try {
+            httpClient.webSocket(urlString = "ws://192.168.0.234:8000/ws/user",
+                request = {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }) {
+                session = this
+                println("WebSocket connection established")
+                try {
+                    for (messages in incoming) {
+                        when (messages) {
+                            is Frame.Binary -> TODO()
+                            is Frame.Close -> onClose(messages.readReason().toString())
+                            is Frame.Ping -> TODO()
+                            is Frame.Pong -> TODO()
+                            is Frame.Text -> {
+                                onTextReceived(messages.readText())
+                            }
+
+                            else -> TODO()
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    println(e.message)
+                }
+            }
+        }catch (e: Exception){
+            println(e)
+        }
+
+    }
+
+
+}

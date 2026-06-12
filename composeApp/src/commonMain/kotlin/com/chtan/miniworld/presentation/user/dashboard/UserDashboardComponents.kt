@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.HolidayVillage
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MapsUgc
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Villa
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -92,7 +95,17 @@ sealed class UserDashboardNavBarItem(
     data object Leaderboard: UserDashboardNavBarItem(UserDashboardRoute.Leaderboard, "Leaderboard", Icons.Filled.Leaderboard)
     data object Settings: UserDashboardNavBarItem(UserDashboardRoute.Setting, "Settings", Icons.Filled.Settings)
 
+
+
+
+
+
+// Admin
     data object EditMap: UserDashboardNavBarItem(UserDashboardRoute.EditMap, "Edit Map", Icons.Filled.MapsUgc)
+    data object CreateClan: UserDashboardNavBarItem(UserDashboardRoute.CreateClan, "Create Clan", Icons.Filled.Build)
+    data object ClanOverview: UserDashboardNavBarItem(UserDashboardRoute.ClanOverview, "Clan Overview", Icons.Filled.HolidayVillage)
+
+
 
 }
 
@@ -115,4 +128,11 @@ sealed interface UserDashboardRoute {
 
     @Serializable
     data object EditMap : UserDashboardRoute
+
+    @Serializable
+    data object CreateClan : UserDashboardRoute
+
+    @Serializable
+    data object ClanOverview : UserDashboardRoute
+
 }

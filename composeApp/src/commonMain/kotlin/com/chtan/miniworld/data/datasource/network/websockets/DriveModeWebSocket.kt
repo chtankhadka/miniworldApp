@@ -1,6 +1,6 @@
 package com.chtan.miniworld.data.datasource.network.websockets
 
-import DriveControlDto
+import com.chtan.miniworld.data.datasource.network.model.DriveControlDto
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.chtan.miniworld.data.datasource.local.StoredData

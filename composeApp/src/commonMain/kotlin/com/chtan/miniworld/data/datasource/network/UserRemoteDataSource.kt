@@ -6,7 +6,6 @@ import com.chtan.miniworld.data.datasource.local.StoredData
 import com.chtan.miniworld.data.datasource.network.api.ApiEndPoints.SIGN_IN
 import com.chtan.miniworld.data.datasource.network.model.authorization.SignInRequestModel
 import com.chtan.miniworld.data.datasource.network.model.authorization.SignInResponseModel
-import com.chtan.miniworld.data.datasource.network.result.DataError
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket
@@ -19,9 +18,9 @@ import io.ktor.http.contentType
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
-import org.chtan.personalwork.core.data.responseToResult
-import org.chtan.personalwork.core.data.safeCall
-import org.chtan.personalwork.core.domain.Result
+import com.chtan.miniworld.data.datasource.network.httpclient.responseToResult
+import com.chtan.miniworld.data.datasource.network.httpclient.safeCall
+import com.chtan.miniworld.data.datasource.network.result.RemoteResult
 
 class UserRemoteDataSource(
     private val httpClient: HttpClient,
@@ -34,7 +33,7 @@ class UserRemoteDataSource(
     private suspend inline fun <reified T> authorizeRequest(
         endpoint: String,
         body: Any? = null
-    ): Result<T, DataError.Remote> {
+    ): RemoteResult<T> {
         return safeCall(execute = {
             httpClient.post(urlString = endpoint) {
                 contentType(ContentType.Application.Json)
@@ -50,7 +49,7 @@ class UserRemoteDataSource(
     private suspend inline fun <reified T> publicRequest(
         endpoint: String,
         body: Any? = null
-    ): Result<T, DataError.Remote> {
+    ): RemoteResult<T> {
         return safeCall(execute = {
             httpClient.post(urlString = endpoint) {
                 contentType(ContentType.Application.Json)
@@ -100,7 +99,7 @@ class UserRemoteDataSource(
     }
 
 
-    suspend fun signIn(data: SignInRequestModel): Result<SignInResponseModel, DataError.Remote> {
+    suspend fun signIn(data: SignInRequestModel): RemoteResult<SignInResponseModel> {
         return publicRequest(SIGN_IN, data)
     }
 

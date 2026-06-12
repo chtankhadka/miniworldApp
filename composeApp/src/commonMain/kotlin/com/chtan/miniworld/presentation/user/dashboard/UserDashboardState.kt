@@ -1,7 +1,7 @@
 package com.chtan.miniworld.presentation.user.dashboard
 
-import com.chtan.miniworld.presentation.user.map.Land
-import com.chtan.miniworld.presentation.user.map.MapPoint
+import com.chtan.miniworld.presentation.user.dashboard.map.Land
+import com.chtan.miniworld.presentation.user.dashboard.map.MapPoint
 
 data class UserDashboardState(
     val mapLandDetails: List<Land> =   listOf<Land>(

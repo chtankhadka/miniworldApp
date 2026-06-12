@@ -1,11 +1,14 @@
 package com.chtan.miniworld.di
 
 import com.chtan.miniworld.data.datasource.local.UserLocalDataSource
+import com.chtan.miniworld.data.datasource.network.AdminRemoteDataSource
 import com.chtan.miniworld.data.datasource.network.websockets.DriveWebSocketDataSource
 import com.chtan.miniworld.data.datasource.network.UserRemoteDataSource
 import com.chtan.miniworld.data.datasource.network.websockets.ImageWebSocketDataSource
+import com.chtan.miniworld.data.repositoryImpl.AdminRepositoryImpl
 import com.chtan.miniworld.data.repositoryImpl.SocketRepositoryImpl
 import com.chtan.miniworld.data.repositoryImpl.UserRepositoryImpl
+import com.chtan.miniworld.domain.repository.AdminRepository
 import com.chtan.miniworld.domain.repository.SocketRepository
 import com.chtan.miniworld.domain.repository.UserRepository
 import org.koin.dsl.module
@@ -18,6 +21,13 @@ fun dataModule() = module {
             get(), // userLocalDataSource
             get()  // driveWebSocketDataSource
         )
+    }
+
+    single<AdminRepository> {
+        AdminRepositoryImpl(
+            get()
+        )
+
     }
     single<SocketRepository> {
         SocketRepositoryImpl(
@@ -32,4 +42,9 @@ fun dataModule() = module {
     single { UserLocalDataSource() }
     single { DriveWebSocketDataSource(get(), get()) }
     single { ImageWebSocketDataSource(get(), get()) }
+
+    // Admin
+    single { AdminRemoteDataSource(get(), get()) }
+
+
 }

@@ -23,4 +23,11 @@ object ApiEndPoints {
     const val MY_PROFILE = "$BASE_URL/api/myprofile"
     const val ULALA = "$BASE_URL/api/ulala"
     const val UPLOAD_PHOTO_FOR_ULALA = "$BASE_URL/api/uploadphotoforulala"
+
+
+
+    // Admin
+    const val ADMIN_CREATE_CLAN = "$BASE_URL/api/createclan"
+    const val ADMIN_ADD_DEVICE_TO_CLAN = "$BASE_URL/api/adddevice"
+    const val GET_CREATED_CLANS = "$BASE_URL/api/getcreatedclans"
 }

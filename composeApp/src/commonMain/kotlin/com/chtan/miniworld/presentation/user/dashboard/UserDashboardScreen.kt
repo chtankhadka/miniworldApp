@@ -36,10 +36,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.chtan.miniworld.Route
 import com.chtan.miniworld.presentation.components.shapes.RoundedParallelogram
-import com.chtan.miniworld.presentation.user.home.HomeScreen
-import com.chtan.miniworld.presentation.user.map.UserMapScreen
-import com.chtan.miniworld.presentation.user.map.UserMapScreenPointsGenerator
+import com.chtan.miniworld.presentation.user.dashboard.home.HomeScreen
+import com.chtan.miniworld.presentation.user.dashboard.map.UserMapScreen
+import com.chtan.miniworld.presentation.user.dashboard.map.UserMapScreenPointsGenerator
 import miniworld.composeapp.generated.resources.Res
 import miniworld.composeapp.generated.resources.raceFlag
 import org.jetbrains.compose.resources.painterResource
@@ -58,9 +59,9 @@ fun UserDashboardScreen(
 
     Scaffold(
         topBar = {
-        MiniWorldTopAppBar()
+        UserDashboardTopAppBar()
     }, bottomBar = {
-        MiniWorldBottomAppBar()
+        UserDashboardBottomAppBar()
     },
         floatingActionButton = {
 
@@ -72,6 +73,8 @@ fun UserDashboardScreen(
                         UserDashboardNavBarItem.Leaderboard,
                         UserDashboardNavBarItem.Settings,
                         UserDashboardNavBarItem.EditMap,
+                        UserDashboardNavBarItem.CreateClan,
+                        UserDashboardNavBarItem.ClanOverview
 
                     ).forEach { item ->
 
@@ -122,7 +125,18 @@ fun UserDashboardScreen(
                                     unselectedTextColor = Color.White,
                                 ),
                                 onClick = {
-                                    bottomNavController.navigate(item.route)
+                                    when (item.route) {
+                                        UserDashboardRoute.CreateClan -> {
+                                            nav.navigate(Route.AdminCreateClan)
+                                        }
+                                        UserDashboardRoute.ClanOverview -> {
+                                            nav.navigate(Route.AdminClanOverview)
+                                        }
+                                        else -> {
+                                            bottomNavController.navigate(item.route)
+
+                                        }
+                                    }
                                 },
                             )
                             HorizontalDivider()
@@ -152,6 +166,7 @@ fun UserDashboardScreen(
                 composable<UserDashboardRoute.EditMap> {
                     UserMapScreenPointsGenerator()
                 }
+
             }
         }
     })

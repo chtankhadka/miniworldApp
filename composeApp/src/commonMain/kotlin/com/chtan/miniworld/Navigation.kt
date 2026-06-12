@@ -6,15 +6,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.chtan.miniworld.presentation.user.drive.DriveScreen
-import com.chtan.miniworld.presentation.user.drive.DriveViewModel
+import com.chtan.miniworld.presentation.admin.clan.clanoverview.AdminClanOverviewScreen
+import com.chtan.miniworld.presentation.admin.clan.clanoverview.AdminClanOverviewViewModel
+import com.chtan.miniworld.presentation.admin.clan.createclan.CreateAdminClanScreen
+import com.chtan.miniworld.presentation.admin.clan.createclan.CreateAdminClanViewModel
+import com.chtan.miniworld.presentation.user.dashboard.drive.DriveScreen
+import com.chtan.miniworld.presentation.user.dashboard.drive.DriveViewModel
 import com.chtan.miniworld.presentation.login.SignInScreen
 import com.chtan.miniworld.presentation.login.SignInViewModel
+import com.chtan.miniworld.presentation.user.clanOverview.UserClanOverviewScreen
+import com.chtan.miniworld.presentation.user.clanOverview.UserClanOverviewViewModel
 import com.chtan.miniworld.presentation.user.dashboard.UserDashboardScreen
 import com.chtan.miniworld.presentation.user.dashboard.UserDashboardViewModel
-import com.chtan.miniworld.presentation.user.home.HomeScreen
-import com.chtan.miniworld.presentation.user.selectVehicle.UserSelectVehicleScreen
-import com.chtan.miniworld.presentation.user.selectVehicle.UserSelectVehicleViewModel
+import com.chtan.miniworld.presentation.user.dashboard.home.HomeScreen
 import kotlinx.coroutines.CoroutineScope
 
 import org.koin.compose.viewmodel.koinViewModel
@@ -89,16 +93,36 @@ fun Navigation(
                 state = viewModel.state.collectAsStateWithLifecycle().value)
         }
 
-        composable<Route.UserSelectVehicle> {
-            val viewModel: UserSelectVehicleViewModel = koinViewModel()
+        composable<Route.UserClanOverview> {
+            val viewModel: UserClanOverviewViewModel = koinViewModel()
 
-            UserSelectVehicleScreen(
+            UserClanOverviewScreen(
                 nav = navController,
                 event = viewModel.onEvent,
                 state = viewModel.state.collectAsStateWithLifecycle().value)
         }
         composable<Route.UserHome> {
             HomeScreen()
+        }
+
+        composable<Route.AdminCreateClan>{
+            val viewModel: CreateAdminClanViewModel = koinViewModel()
+
+            CreateAdminClanScreen(
+                nav = navController,
+                event = viewModel.onEvent,
+                state = viewModel.state.collectAsStateWithLifecycle().value
+                )
+        }
+
+        composable<Route.AdminClanOverview>{
+            val viewModel: AdminClanOverviewViewModel = koinViewModel()
+
+            AdminClanOverviewScreen(
+                nav = navController,
+                event= viewModel.onEvent,
+                state = viewModel.state.collectAsStateWithLifecycle().value
+                )
         }
 
     }
